@@ -17,6 +17,8 @@ variable (a : V)
 #check IsEmpty a
 #check “∃ e, ∀ y, y ∉ e”
 
+def random : Sentence ℒₛₑₜ := “∀ x, !isEmpty x”
+
 def empty : Sentence ℒₛₑₜ := “∃ e, ∀ y, y ∉ e”
 
 def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
