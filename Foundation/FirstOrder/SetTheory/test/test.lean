@@ -24,6 +24,8 @@ def empty : Sentence ℒₛₑₜ := “∃ e, ∀ y, y ∉ e”
 
 def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
 
+example (b : V) : b = b := by
+    rfl
 
 lemma subset_def {a b : V} : a ⊆ b ↔ ∀ x ∈ a, x ∈ b := by rfl
 
