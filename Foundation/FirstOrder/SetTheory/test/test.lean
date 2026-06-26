@@ -15,7 +15,6 @@ variable (a : V)
 #check V
 #check IsEmpty
 #check IsEmpty a
-#check “∃ e, !isEmpty e → e ∈ e”
 #check ToString
 #check “∃ e, !isEmpty e → e ∈ e”
 
