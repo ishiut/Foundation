@@ -24,10 +24,24 @@ def empty : Sentence ℒₛₑₜ := “∃ e, ∀ y, y ∉ e”
 
 def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
 
+#check ZermeloFraenkel.axiom_of_empty_set
+#check empty
+
+namespace LO
+namespace FirstOrder
+namespace Semiformula
+#check Semiformula.EvalAux
+#check Semiformula.eval_ex
+#check Models
+#check Models V empty
+
+example : V ⊧ₘ empty := by
+    unfold empty
+    unfold Models
+    unfold Semantics.Models
+    apply Semiformula.eval_rel₂
 
 
-example : V ⊧ₘ “∃ e, !isEmpty e” := by
-    apply?
 
 lemma subset_def {a b : V} : a ⊆ b ↔ ∀ x ∈ a, x ∈ b := by rfl
 
