@@ -7,7 +7,7 @@ public import Foundation.FirstOrder.Basic.Syntax.Formula
 namespace LO.FirstOrder.SetTheory
 namespace Semiformula
 
-variable {V : Type*} [SetStructure V]
+variable {V : Type*} [SetStructure V] [Nonempty V] [V ⊧ₘ* 𝗭𝗙𝗖]
 variable (a : V)
 
 -- scoped instance : HasSubset V := ⟨fun x y ↦ ∀ z ∈ x, z ∈ y⟩
@@ -24,8 +24,10 @@ def empty : Sentence ℒₛₑₜ := “∃ e, ∀ y, y ∉ e”
 
 def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
 
-example (b : V) : b = b := by
-    rfl
+
+
+example : V ⊧ₘ “∃ e, !isEmpty e” := by
+    apply?
 
 lemma subset_def {a b : V} : a ⊆ b ↔ ∀ x ∈ a, x ∈ b := by rfl
 
