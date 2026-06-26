@@ -16,7 +16,8 @@ variable (a : V)
 #check IsEmpty
 #check IsEmpty a
 #check “∃ e, !isEmpty e → e ∈ e”
-#check “∃ e, e = e” a a a
+#check ToString
+#check “∃ e, !isEmpty e → e ∈ e”
 
 def random : Sentence ℒₛₑₜ := “∀ x, !isEmpty x”
 
