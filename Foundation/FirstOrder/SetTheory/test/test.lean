@@ -27,9 +27,6 @@ def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I
 #check ZermeloFraenkel.axiom_of_empty_set
 #check empty
 
-namespace LO
-namespace FirstOrder
-namespace Semiformula
 #check Semiformula.EvalAux
 #check Semiformula.eval_ex
 #check Models
@@ -100,7 +97,7 @@ variable (v1 : V)
 lemma V_empty_spec: ∀ y : V, y ∉ (V_empty : V) := Classical.choose_spec V_empty_lemma
 
 -- To apply the property of the constant (in this case V_empty), we can use V_empty_lemma
--- obtained as above. 
+-- obtained as above.
 example : V ⊧/![V_empty, v1] (“∀ y, y ∉ #1” : Semiformula ℒₛₑₜ Empty 2) := by
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Semiformula.eval_all,
       LogicalConnective.HomClass.map_neg, Semiformula.eval_operator_two, Semiterm.val_bvar,
@@ -141,9 +138,6 @@ lemma V_singleton : ∀ x : V, ∃ y : V, ∀ z, (z ∈ y ↔ z = x) := by
         left
         apply hzx
 
-end Semiformula
-end FirstOrder
-end LO
 end Semiformula
 end SetTheory
 end FirstOrder
