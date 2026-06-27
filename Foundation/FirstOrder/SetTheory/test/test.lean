@@ -79,7 +79,7 @@ example : V ⊧ₘ (“∃ x, ∀ y, y ∉ x” : Sentence ℒₛₑₜ) := by
     --   Semiterm.val_bvar, Matrix.cons_val_zero, Matrix.cons_val_one, Fin.Fin1.eq_one,
     --   Matrix.cons_val_fin_one, Structure.Mem.mem, LogicalConnective.Prop.neg_eq]
 
-lemma V_empty : ∃ x : V, ∀ y, y ∉ x := by
+lemma V_empty_lemma : ∃ x : V, ∀ y, y ∉ x := by
     have h1 : V ⊧ₘ empty := V_models_empty
     rw [models_iff] at h1
     unfold empty at h1
@@ -87,6 +87,10 @@ lemma V_empty : ∃ x : V, ∀ y, y ∉ x := by
     obtain ⟨e, he⟩ := h1
     use e
     exact he
+
+noncomputable def V_empty : V := Classical.choose V_empty_lemma
+
+#check V_empty
 
 #check ZermeloFraenkel Axiom.pairing
 #check Axiom.pairing
@@ -127,4 +131,3 @@ end Semiformula
 end SetTheory
 end FirstOrder
 end LO
-
