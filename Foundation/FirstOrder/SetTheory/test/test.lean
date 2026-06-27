@@ -92,6 +92,10 @@ noncomputable def V_empty : V := Classical.choose V_empty_lemma
 
 #check V_empty
 
+lemma V_empty_spec: ∀ y : V, y ∉ (V_empty : V) := Classical.choose_spec V_empty_lemma
+
+
+
 #check ZermeloFraenkel Axiom.pairing
 #check Axiom.pairing
 
