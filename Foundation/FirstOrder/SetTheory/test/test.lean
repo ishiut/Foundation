@@ -43,18 +43,19 @@ namespace Semiformula
 #check “∃ x, x = x”
 #check empty
 
-
 lemma V_models_empty : V ⊧ₘ empty := by
-    -- rw [models_iff]
-    -- unfold Semiformula.Evalbm
-    -- unfold ZermeloFraenkelChoice at hV_ZFC
+    -- You can split V ⊧ₘ* 𝗭𝗙𝗖 into V ⊧ₘ* 𝗭𝗙 ∧ V ⊧ₘ* 𝗔𝗖
     simp only [ModelsTheory.add_iff] at hV_ZFC
     obtain ⟨hV_ZF, hV_AC⟩ := hV_ZFC
+    -- By this, we can interpret ⊧ₘ* by using ⊧ₘ
     apply modelsTheory_iff.mp at hV_ZF
+    -- Use ZermeloFraenkel.axiom_of_empty_set, the instance of Axiom.empty
     apply hV_ZF ZermeloFraenkel.axiom_of_empty_set
 
 example : V ⊧ₘ (“∃ x, x = x” : Sentence ℒₛₑₜ) := by
+    -- models_iff translates ⊧ₘ by using evaluation ⊧/!
     rw [models_iff]
+    -- These simps can be done by simp?
     simp only [Semiformula.eval_ex]
     simp only [Semiformula.eval_operator_two]
     simp only [Structure.Eq.eq]
@@ -71,6 +72,7 @@ example : V ⊧ₘ (“∃ x, ∀ y, y ∉ x” : Sentence ℒₛₑₜ) := by
     have h1 : V ⊧ₘ empty := V_models_empty
     rw [models_iff] at h1
     unfold empty at h1
+    -- From V ⊧/![] (“∃⁰...”), you can have ∃ x statement.
     rw [Semiformula.eval_ex] at h1
     obtain ⟨e, he⟩ := h1
     use e
@@ -79,6 +81,7 @@ example : V ⊧ₘ (“∃ x, ∀ y, y ∉ x” : Sentence ℒₛₑₜ) := by
     --   Semiterm.val_bvar, Matrix.cons_val_zero, Matrix.cons_val_one, Fin.Fin1.eq_one,
     --   Matrix.cons_val_fin_one, Structure.Mem.mem, LogicalConnective.Prop.neg_eq]
 
+-- This is a template to set up the constant of the object that is proven to exist.
 lemma V_empty_lemma : ∃ x : V, ∀ y, y ∉ x := by
     have h1 : V ⊧ₘ empty := V_models_empty
     rw [models_iff] at h1
@@ -88,12 +91,22 @@ lemma V_empty_lemma : ∃ x : V, ∀ y, y ∉ x := by
     use e
     exact he
 
+-- It must be noncomputable.
 noncomputable def V_empty : V := Classical.choose V_empty_lemma
+variable (v1 : V)
 
 #check V_empty
 
 lemma V_empty_spec: ∀ y : V, y ∉ (V_empty : V) := Classical.choose_spec V_empty_lemma
 
+-- To apply the property of the constant (in this case V_empty), we can use V_empty_lemma
+-- obtained as above. 
+example : V ⊧/![V_empty, v1] (“∀ y, y ∉ #1” : Semiformula ℒₛₑₜ Empty 2) := by
+    simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Semiformula.eval_all,
+      LogicalConnective.HomClass.map_neg, Semiformula.eval_operator_two, Semiterm.val_bvar,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Structure.Mem.mem, LogicalConnective.Prop.neg_eq]
+    intro y
+    apply V_empty_spec
 
 
 #check ZermeloFraenkel Axiom.pairing
