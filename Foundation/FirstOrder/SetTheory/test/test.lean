@@ -219,16 +219,6 @@ lemma V_tripleton : ∀ a b c : V, ∃ x : V, ∀ y : V, y ∈ x ↔ y = a ∨ y
         right; rfl
       case h.right =>
         rw [hc]
-      
-
-
-
-
-
-
-
-
-
 
 end Semiformula
 end SetTheory
