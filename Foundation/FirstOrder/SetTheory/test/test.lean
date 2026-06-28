@@ -138,6 +138,8 @@ lemma V_singleton : ∀ x : V, ∃ y : V, ∀ z, (z ∈ y ↔ z = x) := by
         left
         apply hzx
 
+
+
 end Semiformula
 end SetTheory
 end FirstOrder
