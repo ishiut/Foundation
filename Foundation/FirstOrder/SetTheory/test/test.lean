@@ -220,6 +220,27 @@ lemma V_tripleton : ∀ a b c : V, ∃ x : V, ∀ y : V, y ∈ x ↔ y = a ∨ y
       case h.right =>
         rw [hc]
 
+-- lemma subset_def {a b : V} : a ⊆ b ↔ ∀ x ∈ a, x ∈ b := by rfl
+-- def power : Sentence ℒₛₑₜ := “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ⊆ x”
+lemma V_power : ∀ x : V, ∃ y : V, ∀ z, z ∈ y ↔ z ⊆ x := by
+  intro x
+  have h1 : V ⊧ₘ Axiom.power := by
+    simp only [ModelsTheory.add_iff] at hV_ZFC
+    obtain ⟨hV_ZF, hV_AC⟩ := hV_ZFC
+    apply modelsTheory_iff.mp at hV_ZF
+    apply hV_ZF ZermeloFraenkel.axiom_of_power_set
+  rw [models_iff] at h1
+  unfold Axiom.power at h1
+  simp only [Nat.reduceAdd, Fin.isValue, Semiformula.eval_all, Nat.succ_eq_add_one,
+    Semiformula.eval_ex, LogicalConnective.HomClass.map_iff, Semiformula.eval_operator_two,
+    Semiterm.val_bvar, Matrix.cons_val_zero, Matrix.cons_val_one, Structure.Mem.mem,
+    Semiformula.eval_substs, Defined.eval_iff, Fin.Fin1.eq_one, Matrix.cons_val_fin_one,
+    Matrix.cons_app_two, LogicalConnective.Prop.iff_eq] at h1
+  obtain ⟨y, hy⟩ := h1 x
+  use y
+
+
+
 end Semiformula
 end SetTheory
 end FirstOrder
