@@ -109,7 +109,8 @@ example : V ⊧/![V_empty, v1] (“∀ y, y ∉ #1” : Semiformula ℒₛₑₜ
 #check ZermeloFraenkel Axiom.pairing
 #check Axiom.pairing
 
-lemma V_pairing : ∀ x y : V, ∃ z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := by
+
+lemma V_pairing_lemma : ∀ x y : V, ∃ z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := by
   have h1 : V ⊧ₘ Axiom.pairing := by
       simp only [ModelsTheory.add_iff] at hV_ZFC
       obtain ⟨hV_ZF, hV_AC⟩ := hV_ZFC
@@ -124,6 +125,31 @@ lemma V_pairing : ∀ x y : V, ∃ z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := 
     Matrix.cons_val_fin_one, Structure.Eq.eq, LogicalConnective.Prop.or_eq,
     LogicalConnective.Prop.iff_eq] at h1
   apply h1
+
+noncomputable def V_pairing (x y : V) : V := Classical.choose (V_pairing_lemma x y)
+#check fun (x y : V) => V_pairing x y
+
+lemma V_pairing_spec (x y : V): ∀ z : V, z ∈ V_pairing x y ↔ z = x ∨ z = y := Classical.choose_spec (V_pairing_lemma x y)
+
+#check V_pairing_spec
+
+-- -- Old definition used in the following parts.
+-- lemma V_pairing : ∀ x y : V, ∃ z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := by
+--   have h1 : V ⊧ₘ Axiom.pairing := by
+--       simp only [ModelsTheory.add_iff] at hV_ZFC
+--       obtain ⟨hV_ZF, hV_AC⟩ := hV_ZFC
+--       apply modelsTheory_iff.mp at hV_ZF
+--       apply hV_ZF ZermeloFraenkel.axiom_of_pairing
+--   rw [models_iff] at h1
+--   unfold Axiom.pairing at h1
+--   simp only [Nat.reduceAdd, Fin.isValue, Semiformula.eval_all, Nat.succ_eq_add_one,
+--     Semiformula.eval_ex, LogicalConnective.HomClass.map_iff, Semiformula.eval_operator_two,
+--     Semiterm.val_bvar, Matrix.cons_val_zero, Matrix.cons_val_one, Structure.Mem.mem,
+--     LogicalConnective.HomClass.map_or, Matrix.cons_app_three, Matrix.cons_app_two, Fin.Fin1.eq_one,
+--     Matrix.cons_val_fin_one, Structure.Eq.eq, LogicalConnective.Prop.or_eq,
+--     LogicalConnective.Prop.iff_eq] at h1
+--   apply h1
+
 
 lemma V_singleton : ∀ x : V, ∃ y : V, ∀ z, (z ∈ y ↔ z = x) := by
   intro x
@@ -239,6 +265,10 @@ lemma V_power : ∀ x : V, ∃ y : V, ∀ z, z ∈ y ↔ z ⊆ x := by
   obtain ⟨y, hy⟩ := h1 x
   use y
 
+#check fun (x y : V) => x ∪ y
+
+-- def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
+lemma V_infinity : ∃ I, V_empty ∈ I ∧ (∀ x ∈ I, ∀ y, )
 
 
 end Semiformula
