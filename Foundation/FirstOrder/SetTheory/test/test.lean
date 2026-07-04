@@ -3,34 +3,83 @@ module
 public import Foundation.FirstOrder.SetTheory.Basic
 public import Foundation.FirstOrder.Basic.Semantics.Semantics
 public import Foundation.FirstOrder.Basic.Syntax.Formula
+public import Foundation.Vorspiel.ExistsUnique
+public import Foundation.FirstOrder.SetTheory.Z
 
 namespace LO.FirstOrder.SetTheory
 namespace Semiformula
+
+section external
+
+example (W : Type) [SetStructure W] [Nonempty W] [W ⊧ₘ* 𝗭𝗙] [W ⊧ₘ* 𝗔𝗖] : W ⊧ₘ* 𝗭𝗙𝗖 := by
+  exact instModelsTheoryZermeloFraenkelChoiceOfZermeloFraenkelOfAxiomOfChoice
+
+example (W : Type) [SetStructure W] [Nonempty W] [W ⊧ₘ* 𝗭𝗙𝗖]: W ⊧ₘ* 𝗭𝗙 := by
+  exact ModelsTheory.of_add_left W 𝗭𝗙 𝗔𝗖
+
+example (W : Type) [SetStructure W] [Nonempty W] [W ⊧ₘ* 𝗭𝗙]: W ⊧ₘ* 𝗭 := by
+  apply?
+
 
 variable {V : Type*} [SetStructure V] [hV_Nonempty: Nonempty V] [hV_ZFC : V ⊧ₘ* 𝗭𝗙𝗖]
 variable (a : V)
 
 -- scoped instance : HasSubset V := ⟨fun x y ↦ ∀ z ∈ x, z ∈ y⟩
 
+open Classical
+
+lemma hV_ZF : V ⊧ₘ* 𝗭𝗙 := by
+  unfold ZermeloFraenkelChoice at hV_ZFC
+  exact ModelsTheory.of_add_left V 𝗭𝗙 𝗔𝗖
+
+lemma hV_Z : V ⊧ₘ* 𝗭 := by
+  apply ModelsTheory.of_ss hV_ZF z_subset_zf
+
+attribute [local instance] hV_Z
+
 #check V
-#check IsEmpty
+#check empty_exists
 #check IsEmpty a
+#check (∅ : V)
+#check IsEmpty ∅
+#check IsEmpty.empty
+
+example (A B : Theory ℒₛₑₜ) (h1 : A ⊆ B) (h2 : V ⊧ₘ* B) : V ⊧ₘ* A := by
+  exact ModelsTheory.of_ss h2 h1
+
+example : IsEmpty (∅ : V) := by
+  have h : V ⊧ₘ* 𝗭 := hV_Z
+  exact IsEmpty.empty
+
+example : ∀ x : V, (∀ y : V, y ∉ x) ↔ x = ∅ := by
+  intro x
+  constructor
+  case mp =>
+    intro hx
+    ext z
+    constructor
+    case a.mp =>
+      intro hz
+      absurd hz
+      apply hx
+    case a.mpr =>
+      intro h_empty
+      absurd h_empty
+      exact not_mem_empty
+  case mpr =>
+    intro hx y
+    rw [hx]
+    exact not_mem_empty
+
 #check ToString
 #check “∃ e, !isEmpty e → e ∈ e”
 
-def random : Sentence ℒₛₑₜ := “∀ x, !isEmpty x”
-
-def empty : Sentence ℒₛₑₜ := “∃ e, ∀ y, y ∉ e”
-
-def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
-
 #check ZermeloFraenkel.axiom_of_empty_set
-#check empty
 
 #check Semiformula.EvalAux
 #check Semiformula.eval_ex
 #check Models
-#check Models V empty
+#check Models V Axiom.empty
 #check models_iff_models
 #check Semiformula.Evalbm
 #check ModelsTheory.add_iff
@@ -38,9 +87,15 @@ def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I
 #check ModelsTheory
 #check modelsTheory_iff
 #check “∃ x, x = x”
-#check empty
+#check Axiom.empty
 
-lemma V_models_empty : V ⊧ₘ empty := by
+-- def empty : Sentence ℒₛₑₜ := “∃ e, ∀ y, y ∉ e”
+
+example : ∃ e : V, ∀ y, y ∉ e := by
+  have := by simpa [models_iff, Axiom.empty] using ModelsTheory.models V Zermelo.axiom_of_empty_set
+  apply this
+
+lemma V_models_empty : V ⊧ₘ Axiom.empty := by
   -- You can split V ⊧ₘ* 𝗭𝗙𝗖 into V ⊧ₘ* 𝗭𝗙 ∧ V ⊧ₘ* 𝗔𝗖
   simp only [ModelsTheory.add_iff] at hV_ZFC
   obtain ⟨hV_ZF, hV_AC⟩ := hV_ZFC
@@ -62,6 +117,51 @@ example : V ⊧ₘ (“∃ x, x = x” : Sentence ℒₛₑₜ) := by
   --   Matrix.cons_val_fin_one, Structure.Eq.eq, exists_const]
 
 #check Semiformula.eval_ex
+
+#check IsEmpty.empty
+
+example : (∅ : V) ∉ (∅ : V) := by
+  apply IsEmpty.empty
+
+#check doubleton
+
+example (x : V) : ∃ y : V, ∀ z : V, (z ∈ y ↔ z = x) := by
+  use doubleton x x
+  intro z
+  constructor
+  case h.mp =>
+    intro h
+    apply mem_doubleton_iff.mp at h
+    cases h <;> assumption
+  case h.mpr =>
+    intro h
+    rw [mem_doubleton_iff]
+    left; exact h
+
+example (x : V): ∀ z : V, (z ∈ singleton x ↔ z = x) := by
+  apply mem_singleton_iff
+  -- intro z
+  -- constructor
+  -- case mp =>
+  --   intro hz
+  --   apply mem_singleton_iff.mp at hz
+  --   exact hz
+  -- case mpr =>
+  --   intro hz
+  --   apply mem_singleton_iff.mpr
+  --   exact hz
+
+example (x : V): ∀ z : V, (z ∈ ({x} : V) ↔ z = x) := by
+  intro z
+  constructor
+  case mp =>
+    intro hz
+    apply mem_singleton_iff.mp at hz
+    exact hz
+  case mpr =>
+    intro hz
+    apply mem_singleton_iff.mpr
+    exact hz
 
 example : V ⊧ₘ (“∃ x, ∀ y, y ∉ x” : Sentence ℒₛₑₜ) := by
   rw [models_iff]
@@ -183,6 +283,55 @@ lemma V_union : ∀ x : V, ∃ y : V, ∀ z, z ∈ y ↔ ∃ w ∈ x, z ∈ w :=
     LogicalConnective.Prop.iff_eq] at h1
   apply h1
 
+example : ∀ a b c : V, ∃ x : V, ∀ y : V, y ∈ x ↔ y = a ∨ y = b ∨ y = c := by
+  intro a b c
+  use sUnion (doubleton (doubleton a b) (singleton c))
+  intro y
+  constructor
+  case h.mp =>
+    intro hy
+    apply mem_sUnion_iff.mp at hy
+    obtain ⟨x, hx1, hx2⟩ := hy
+    apply mem_doubleton_iff.mp at hx1
+    obtain hab | hc := hx1
+    case inl =>
+      rw [hab] at hx2
+      apply mem_doubleton_iff.mp at hx2
+      obtain hya | hyb := hx2
+      case inl =>
+        left; exact hya
+      case inr =>
+        right; left; exact hyb
+    case inr =>
+      rw [hc] at hx2
+      apply mem_singleton_iff.mp at hx2
+      right; right; exact hx2
+  case h.mpr =>
+    intro h
+    rw [mem_sUnion_iff]
+    obtain hya | hyb | hyc := h
+    case inl =>
+      use doubleton a b
+      simp only [mem_doubleton_iff, true_or, true_and]
+      left; exact hya
+    case inr.inl =>
+      use doubleton a b
+      simp only [mem_doubleton_iff, true_or, true_and]
+      right; exact hyb
+    case inr.inr =>
+      use singleton c
+      simp only [mem_doubleton_iff, or_true, true_and]
+      apply mem_singleton_iff.mpr hyc
+      
+
+
+
+
+
+
+
+
+
 -- As an example of the axiom of union,
 lemma V_tripleton : ∀ a b c : V, ∃ x : V, ∀ y : V, y ∈ x ↔ y = a ∨ y = b ∨ y = c := by
   intro a b c
@@ -270,6 +419,7 @@ lemma V_power : ∀ x : V, ∃ y : V, ∀ z, z ∈ y ↔ z ⊆ x := by
 -- def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
 lemma V_infinity : ∃ I, V_empty ∈ I ∧ (∀ x ∈ I, ∀ y, )
 
+end external
 
 end Semiformula
 end SetTheory
