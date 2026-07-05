@@ -1,32 +1,22 @@
-module
-
-public import Foundation.FirstOrder.SetTheory.Basic
-public import Foundation.FirstOrder.Basic.Semantics.Semantics
-public import Foundation.FirstOrder.Basic.Syntax.Formula
-public import Foundation.Vorspiel.ExistsUnique
-public import Foundation.FirstOrder.SetTheory.Z
+import Foundation.FirstOrder.SetTheory.Basic
+import Foundation.FirstOrder.Basic.Semantics.Semantics
+import Foundation.FirstOrder.Basic.Syntax.Formula
+import Foundation.Vorspiel.ExistsUnique
+import Foundation.FirstOrder.SetTheory.Z
 
 namespace LO.FirstOrder.SetTheory
 namespace Semiformula
 
 section external
 
-example (W : Type) [SetStructure W] [Nonempty W] [W ⊧ₘ* 𝗭𝗙] [W ⊧ₘ* 𝗔𝗖] : W ⊧ₘ* 𝗭𝗙𝗖 := by
-  exact instModelsTheoryZermeloFraenkelChoiceOfZermeloFraenkelOfAxiomOfChoice
-
-example (W : Type) [SetStructure W] [Nonempty W] [W ⊧ₘ* 𝗭𝗙𝗖]: W ⊧ₘ* 𝗭𝗙 := by
-  exact ModelsTheory.of_add_left W 𝗭𝗙 𝗔𝗖
-
-example (W : Type) [SetStructure W] [Nonempty W] [W ⊧ₘ* 𝗭𝗙]: W ⊧ₘ* 𝗭 := by
-  apply?
-
+open Classical
 
 variable {V : Type*} [SetStructure V] [hV_Nonempty: Nonempty V] [hV_ZFC : V ⊧ₘ* 𝗭𝗙𝗖]
-variable (a : V)
 
--- scoped instance : HasSubset V := ⟨fun x y ↦ ∀ z ∈ x, z ∈ y⟩
+section local_attribute
 
-open Classical
+-- This does not work without [V ⊧ₘ* 𝗭].
+example [V ⊧ₘ* 𝗭] : IsEmpty (∅ : V) := by exact IsEmpty.empty
 
 lemma hV_ZF : V ⊧ₘ* 𝗭𝗙 := by
   unfold ZermeloFraenkelChoice at hV_ZFC
@@ -35,95 +25,40 @@ lemma hV_ZF : V ⊧ₘ* 𝗭𝗙 := by
 lemma hV_Z : V ⊧ₘ* 𝗭 := by
   apply ModelsTheory.of_ss hV_ZF z_subset_zf
 
+-- By doing this, hV_Z and hV_ZF can be used without explicitly passing them.
 attribute [local instance] hV_Z
+attribute [local instance] hV_ZF
 
-#check V
-#check empty_exists
-#check IsEmpty a
-#check (∅ : V)
-#check IsEmpty ∅
-#check IsEmpty.empty
+-- Now, it works without [V ⊧ₘ* 𝗭].
+example : IsEmpty (∅ : V) := by exact IsEmpty.empty
 
-example (A B : Theory ℒₛₑₜ) (h1 : A ⊆ B) (h2 : V ⊧ₘ* B) : V ⊧ₘ* A := by
-  exact ModelsTheory.of_ss h2 h1
+section emptyset
 
-example : IsEmpty (∅ : V) := by
-  have h : V ⊧ₘ* 𝗭 := hV_Z
-  exact IsEmpty.empty
-
-example : ∀ x : V, (∀ y : V, y ∉ x) ↔ x = ∅ := by
+example : ∀ x : V, (∀ y : V, y ∉ x) ↔ x = (∅ : V):= by
   intro x
   constructor
   case mp =>
-    intro hx
+    intro h
     ext z
     constructor
     case a.mp =>
       intro hz
       absurd hz
-      apply hx
+      apply h
     case a.mpr =>
-      intro h_empty
-      absurd h_empty
-      exact not_mem_empty
+      intro hz
+      simp only [not_mem_empty] at hz
   case mpr =>
-    intro hx y
+    intro hx
     rw [hx]
-    exact not_mem_empty
+    simp only [not_mem_empty, not_false_eq_true, implies_true]
 
-#check ToString
-#check “∃ e, !isEmpty e → e ∈ e”
+example : ∀ x : V, (∀ y : V, y ∉ x) ↔ x = (∅ : V):= by
+  apply isEmpty_iff_eq_empty
 
-#check ZermeloFraenkel.axiom_of_empty_set
+end emptyset
 
-#check Semiformula.EvalAux
-#check Semiformula.eval_ex
-#check Models
-#check Models V Axiom.empty
-#check models_iff_models
-#check Semiformula.Evalbm
-#check ModelsTheory.add_iff
-#check ZermeloFraenkel
-#check ModelsTheory
-#check modelsTheory_iff
-#check “∃ x, x = x”
-#check Axiom.empty
-
--- def empty : Sentence ℒₛₑₜ := “∃ e, ∀ y, y ∉ e”
-
-example : ∃ e : V, ∀ y, y ∉ e := by
-  have := by simpa [models_iff, Axiom.empty] using ModelsTheory.models V Zermelo.axiom_of_empty_set
-  apply this
-
-lemma V_models_empty : V ⊧ₘ Axiom.empty := by
-  -- You can split V ⊧ₘ* 𝗭𝗙𝗖 into V ⊧ₘ* 𝗭𝗙 ∧ V ⊧ₘ* 𝗔𝗖
-  simp only [ModelsTheory.add_iff] at hV_ZFC
-  obtain ⟨hV_ZF, hV_AC⟩ := hV_ZFC
-  -- By this, we can interpret ⊧ₘ* by using ⊧ₘ
-  apply modelsTheory_iff.mp at hV_ZF
-  -- Use ZermeloFraenkel.axiom_of_empty_set, the instance of Axiom.empty
-  apply hV_ZF ZermeloFraenkel.axiom_of_empty_set
-
-example : V ⊧ₘ (“∃ x, x = x” : Sentence ℒₛₑₜ) := by
-  -- models_iff translates ⊧ₘ by using evaluation ⊧/!
-  rw [models_iff]
-  -- These simps can be done by simp?
-  simp only [Semiformula.eval_ex]
-  simp only [Semiformula.eval_operator_two]
-  simp only [Structure.Eq.eq]
-  simp only [exists_const]
-  -- simp only [Nat.reduceAdd, Fin.Fin1.eq_one, Fin.isValue, Semiformula.eval_ex,
-  --   Nat.succ_eq_add_one, Semiformula.eval_operator_two, Semiterm.val_bvar,
-  --   Matrix.cons_val_fin_one, Structure.Eq.eq, exists_const]
-
-#check Semiformula.eval_ex
-
-#check IsEmpty.empty
-
-example : (∅ : V) ∉ (∅ : V) := by
-  apply IsEmpty.empty
-
-#check doubleton
+section singleton
 
 example (x : V) : ∃ y : V, ∀ z : V, (z ∈ y ↔ z = x) := by
   use doubleton x x
@@ -140,16 +75,6 @@ example (x : V) : ∃ y : V, ∀ z : V, (z ∈ y ↔ z = x) := by
 
 example (x : V): ∀ z : V, (z ∈ singleton x ↔ z = x) := by
   apply mem_singleton_iff
-  -- intro z
-  -- constructor
-  -- case mp =>
-  --   intro hz
-  --   apply mem_singleton_iff.mp at hz
-  --   exact hz
-  -- case mpr =>
-  --   intro hz
-  --   apply mem_singleton_iff.mpr
-  --   exact hz
 
 example (x : V): ∀ z : V, (z ∈ ({x} : V) ↔ z = x) := by
   intro z
@@ -163,125 +88,22 @@ example (x : V): ∀ z : V, (z ∈ ({x} : V) ↔ z = x) := by
     apply mem_singleton_iff.mpr
     exact hz
 
-example : V ⊧ₘ (“∃ x, ∀ y, y ∉ x” : Sentence ℒₛₑₜ) := by
+example : V ⊧ₘ (“∀ x, ∃ y, ∀ z, (z ∈ y ↔ z = x)” : Sentence ℒₛₑₜ) := by
   rw [models_iff]
-  simp only [Semiformula.eval_ex]
-  have h1 : V ⊧ₘ empty := V_models_empty
-  rw [models_iff] at h1
-  unfold empty at h1
-  -- From V ⊧/![] (“∃⁰...”), you can have ∃ x statement.
-  rw [Semiformula.eval_ex] at h1
-  obtain ⟨e, he⟩ := h1
-  use e
-  -- simp only [Nat.reduceAdd, Fin.isValue, Semiformula.eval_ex, Nat.succ_eq_add_one,
-  --   Semiformula.eval_all, LogicalConnective.HomClass.map_neg, Semiformula.eval_operator_two,
-  --   Semiterm.val_bvar, Matrix.cons_val_zero, Matrix.cons_val_one, Fin.Fin1.eq_one,
-  --   Matrix.cons_val_fin_one, Structure.Mem.mem, LogicalConnective.Prop.neg_eq]
-
--- This is a template to set up the constant of the object that is proven to exist.
-lemma V_empty_lemma : ∃ x : V, ∀ y, y ∉ x := by
-  have h1 : V ⊧ₘ empty := V_models_empty
-  rw [models_iff] at h1
-  unfold empty at h1
-  rw [Semiformula.eval_ex] at h1
-  obtain ⟨e, he⟩ := h1
-  use e
-  exact he
-
--- It must be noncomputable.
-noncomputable def V_empty : V := Classical.choose V_empty_lemma
-variable (v1 : V)
-
-#check V_empty
-
-lemma V_empty_spec: ∀ y : V, y ∉ (V_empty : V) := Classical.choose_spec V_empty_lemma
-
--- To apply the property of the constant (in this case V_empty), we can use V_empty_lemma
--- obtained as above.
-example : V ⊧/![V_empty, v1] (“∀ y, y ∉ #1” : Semiformula ℒₛₑₜ Empty 2) := by
-  simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Semiformula.eval_all,
-    LogicalConnective.HomClass.map_neg, Semiformula.eval_operator_two, Semiterm.val_bvar,
-    Matrix.cons_val_zero, Matrix.cons_val_one, Structure.Mem.mem, LogicalConnective.Prop.neg_eq]
-  intro y
-  apply V_empty_spec
-
-
-#check ZermeloFraenkel Axiom.pairing
-#check Axiom.pairing
-
-
-lemma V_pairing_lemma : ∀ x y : V, ∃ z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := by
-  have h1 : V ⊧ₘ Axiom.pairing := by
-      simp only [ModelsTheory.add_iff] at hV_ZFC
-      obtain ⟨hV_ZF, hV_AC⟩ := hV_ZFC
-      apply modelsTheory_iff.mp at hV_ZF
-      apply hV_ZF ZermeloFraenkel.axiom_of_pairing
-  rw [models_iff] at h1
-  unfold Axiom.pairing at h1
   simp only [Nat.reduceAdd, Fin.isValue, Semiformula.eval_all, Nat.succ_eq_add_one,
     Semiformula.eval_ex, LogicalConnective.HomClass.map_iff, Semiformula.eval_operator_two,
     Semiterm.val_bvar, Matrix.cons_val_zero, Matrix.cons_val_one, Structure.Mem.mem,
-    LogicalConnective.HomClass.map_or, Matrix.cons_app_three, Matrix.cons_app_two, Fin.Fin1.eq_one,
-    Matrix.cons_val_fin_one, Structure.Eq.eq, LogicalConnective.Prop.or_eq,
-    LogicalConnective.Prop.iff_eq] at h1
-  apply h1
-
-noncomputable def V_pairing (x y : V) : V := Classical.choose (V_pairing_lemma x y)
-#check fun (x y : V) => V_pairing x y
-
-lemma V_pairing_spec (x y : V): ∀ z : V, z ∈ V_pairing x y ↔ z = x ∨ z = y := Classical.choose_spec (V_pairing_lemma x y)
-
-#check V_pairing_spec
-
--- -- Old definition used in the following parts.
--- lemma V_pairing : ∀ x y : V, ∃ z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := by
---   have h1 : V ⊧ₘ Axiom.pairing := by
---       simp only [ModelsTheory.add_iff] at hV_ZFC
---       obtain ⟨hV_ZF, hV_AC⟩ := hV_ZFC
---       apply modelsTheory_iff.mp at hV_ZF
---       apply hV_ZF ZermeloFraenkel.axiom_of_pairing
---   rw [models_iff] at h1
---   unfold Axiom.pairing at h1
---   simp only [Nat.reduceAdd, Fin.isValue, Semiformula.eval_all, Nat.succ_eq_add_one,
---     Semiformula.eval_ex, LogicalConnective.HomClass.map_iff, Semiformula.eval_operator_two,
---     Semiterm.val_bvar, Matrix.cons_val_zero, Matrix.cons_val_one, Structure.Mem.mem,
---     LogicalConnective.HomClass.map_or, Matrix.cons_app_three, Matrix.cons_app_two, Fin.Fin1.eq_one,
---     Matrix.cons_val_fin_one, Structure.Eq.eq, LogicalConnective.Prop.or_eq,
---     LogicalConnective.Prop.iff_eq] at h1
---   apply h1
-
-
-lemma V_singleton : ∀ x : V, ∃ y : V, ∀ z, (z ∈ y ↔ z = x) := by
+    Matrix.cons_app_two, Fin.Fin1.eq_one, Matrix.cons_val_fin_one, Structure.Eq.eq,
+    LogicalConnective.Prop.iff_eq]
   intro x
-  obtain ⟨y, hy⟩ := V_pairing x x
-  use y
+  use doubleton x x
   intro z
-  constructor
-  case h.mp =>
-    intro hzy
-    apply or_self_iff.mp
-    apply (hy z).mp hzy
-  case h.mpr =>
-    intro hzx
-    apply (hy z).mpr
-    left
-    exact hzx
+  rw [mem_doubleton_iff]
+  simp only [or_self]
 
--- def union : Sentence ℒₛₑₜ := “∀ x, ∃ y, ∀ z, z ∈ y ↔ ∃ w ∈ x, z ∈ w”
-lemma V_union : ∀ x : V, ∃ y : V, ∀ z, z ∈ y ↔ ∃ w ∈ x, z ∈ w := by
-  have h1 : V ⊧ₘ Axiom.union := by
-    simp only [ModelsTheory.add_iff] at hV_ZFC
-    obtain ⟨hV_ZF, hV_AC⟩ := hV_ZFC
-    apply modelsTheory_iff.mp at hV_ZF
-    apply hV_ZF ZermeloFraenkel.axiom_of_union
-  rw [models_iff] at h1
-  unfold Axiom.union at h1
-  simp only [Nat.reduceAdd, Fin.isValue, Semiformula.eval_all, Nat.succ_eq_add_one,
-    Semiformula.eval_ex, LogicalConnective.HomClass.map_iff, Semiformula.eval_operator_two,
-    Semiterm.val_bvar, Matrix.cons_val_zero, Matrix.cons_val_one, Structure.Mem.mem,
-    Semiformula.eval_bexsMem, Matrix.cons_app_two, Fin.Fin1.eq_one, Matrix.cons_val_fin_one,
-    LogicalConnective.Prop.iff_eq] at h1
-  apply h1
+end singleton
+
+section union
 
 example : ∀ a b c : V, ∃ x : V, ∀ y : V, y ∈ x ↔ y = a ∨ y = b ∨ y = c := by
   intro a b c
@@ -322,102 +144,48 @@ example : ∀ a b c : V, ∃ x : V, ∀ y : V, y ∈ x ↔ y = a ∨ y = b ∨ y
       use singleton c
       simp only [mem_doubleton_iff, or_true, true_and]
       apply mem_singleton_iff.mpr hyc
-      
 
-
-
-
-
-
-
-
-
--- As an example of the axiom of union,
-lemma V_tripleton : ∀ a b c : V, ∃ x : V, ∀ y : V, y ∈ x ↔ y = a ∨ y = b ∨ y = c := by
+-- Rewrite by using union of two sets.
+example : ∀ a b c : V, ∃ x : V, ∀ y : V, y ∈ x ↔ y = a ∨ y = b ∨ y = c := by
   intro a b c
-  obtain ⟨pair_ab, hab⟩ := V_pairing a b
-  obtain ⟨singleton_c, hc⟩ := V_singleton c
-  obtain ⟨pair_ab_c, h_ab_c⟩ := V_pairing pair_ab singleton_c
-  obtain ⟨x, hx⟩ := V_union pair_ab_c
-  use x
+  use (doubleton a b) ∪ (singleton c)
   intro y
   constructor
   case h.mp =>
-    intro hyx
-    obtain ⟨w, hw⟩ := (hx y).mp hyx
-    obtain hw1 := (h_ab_c w).mp hw.left
-    obtain case_ab | case_c := hw1
-    case inl =>
-      obtain hyw := hw.right
-      rw [case_ab] at hyw
-      obtain hya | hyb := (hab y).mp hyw
-      case inl => left; exact hya
-      case inr => right; left; exact hyb
+    intro h
+    simp only [mem_union_iff, mem_doubleton_iff] at h
+    obtain (ha | hb) | hc := h
+    case inl.inl =>
+      left; exact ha
+    case inl.inr =>
+      right; left; exact hb
     case inr =>
-      right; right
-      obtain hyw := hw.right
-      rw [case_c] at hyw
-      obtain hyc := (hc y).mp hyw
-      exact hyc
+      apply mem_singleton_iff.mp at hc
+      right; right; exact hc
   case h.mpr =>
-    intro hyabc
-    obtain hya | hyb | hyc := hyabc
+    intro h
+    simp only [mem_union_iff, mem_doubleton_iff]
+    obtain ha | hb | hc := h
     case inl =>
-      rw [hya]
-      apply (hx a).mpr
-      use pair_ab
-      constructor
-      case h.left =>
-        apply (h_ab_c pair_ab).mpr
-        left; rfl
-      case h.right =>
-        apply (hab a).mpr
-        left; rfl
+      left; left; exact ha
     case inr.inl =>
-      rw [hyb]
-      apply (hx b).mpr
-      use pair_ab
-      constructor
-      case h.left =>
-        apply (h_ab_c pair_ab).mpr
-        left; rfl
-      case h.right =>
-        apply (hab b).mpr
-        right; rfl
+      left; right; exact hb
     case inr.inr =>
-      rw [hyc]
-      apply (hx c).mpr
-      use singleton_c
-      constructor
-      case h.left =>
-        rw [h_ab_c]
-        right; rfl
-      case h.right =>
-        rw [hc]
+      right
+      apply mem_singleton_iff.mpr hc
 
--- lemma subset_def {a b : V} : a ⊆ b ↔ ∀ x ∈ a, x ∈ b := by rfl
--- def power : Sentence ℒₛₑₜ := “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ⊆ x”
-lemma V_power : ∀ x : V, ∃ y : V, ∀ z, z ∈ y ↔ z ⊆ x := by
-  intro x
-  have h1 : V ⊧ₘ Axiom.power := by
-    simp only [ModelsTheory.add_iff] at hV_ZFC
-    obtain ⟨hV_ZF, hV_AC⟩ := hV_ZFC
-    apply modelsTheory_iff.mp at hV_ZF
-    apply hV_ZF ZermeloFraenkel.axiom_of_power_set
-  rw [models_iff] at h1
-  unfold Axiom.power at h1
-  simp only [Nat.reduceAdd, Fin.isValue, Semiformula.eval_all, Nat.succ_eq_add_one,
-    Semiformula.eval_ex, LogicalConnective.HomClass.map_iff, Semiformula.eval_operator_two,
-    Semiterm.val_bvar, Matrix.cons_val_zero, Matrix.cons_val_one, Structure.Mem.mem,
-    Semiformula.eval_substs, Defined.eval_iff, Fin.Fin1.eq_one, Matrix.cons_val_fin_one,
-    Matrix.cons_app_two, LogicalConnective.Prop.iff_eq] at h1
-  obtain ⟨y, hy⟩ := h1 x
-  use y
+example : ∀ a b c : V, ∃ x : V, ∀ y : V, y ∈ x ↔ y = a ∨ y = b ∨ y = c := by
+  intro a b c
+  use
 
-#check fun (x y : V) => x ∪ y
 
--- def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
-lemma V_infinity : ∃ I, V_empty ∈ I ∧ (∀ x ∈ I, ∀ y, )
+
+
+
+
+end union
+
+end local_attribute
 
 end external
 
