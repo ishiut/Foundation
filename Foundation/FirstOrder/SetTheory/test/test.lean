@@ -180,12 +180,61 @@ example : ∀ a b c : V, ∃ x : V, ∀ y : V, y ∈ x ↔ y = a ∨ y = b ∨ y
   intro y
   simp only [mem_insert, mem_singleton_iff]
 
-
-
-
-
-
 end union
+
+section power
+
+#check power
+
+example : power (∅ : V) = {∅} := by simp only [power_empty]
+
+lemma subset_of_singleton_empty: ∀ x : V, x ⊆ {∅} → x = ∅ ∨ x = {∅} := by
+  intro x hx
+  by_cases h : ∅ ∈ x
+  case pos =>
+    right
+    ext y
+    simp only [mem_singleton_iff]
+    constructor
+    case h.a.mp =>
+      intro hyx
+      apply hx at hyx
+      simp only [mem_singleton_iff] at hyx
+      exact hyx
+    case h.a.mpr =>
+      intro hy
+      simpa only [hy]
+  case neg =>
+    left
+    ext y
+    constructor
+    case h.a.mp =>
+      intro hyx
+      absurd hyx
+      apply hx at hyx
+      simp only [mem_singleton_iff] at hyx
+      simpa only [hyx]
+    case h.a.mpr =>
+      intro hy
+      simp only [not_mem_empty] at hy
+
+lemma power_singleton_empty : power ({∅} : V) = {∅, {∅}} := by
+  ext y
+  simp only [mem_power_iff, mem_insert, mem_singleton_iff]
+  constructor
+  case a.mp =>
+    intro hy
+    apply subset_of_singleton_empty
+    exact hy
+  case a.mpr =>
+    intro hy
+    obtain hy1 | hy2 := hy
+    case inl =>
+      simp only [hy1, empty_subset]
+    case inr =>
+      simp only [hy2, _root_.subset_refl]
+
+end power
 
 end local_attribute
 
