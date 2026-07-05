@@ -176,7 +176,9 @@ example : ∀ a b c : V, ∃ x : V, ∀ y : V, y ∈ x ↔ y = a ∨ y = b ∨ y
 
 example : ∀ a b c : V, ∃ x : V, ∀ y : V, y ∈ x ↔ y = a ∨ y = b ∨ y = c := by
   intro a b c
-  use
+  use {a, b, c}
+  intro y
+  simp only [mem_insert, mem_singleton_iff]
 
 
 
