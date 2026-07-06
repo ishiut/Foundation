@@ -251,6 +251,15 @@ example : ∀ x : V, (x ∈ (ω : V) → x ∪ {x} ∈ (ω : V)) := by
   rw [h_succ]
   exact ω_succ_closed hx
 
+example : ({∅} : V) ∈ (ω : V) := by
+  have h : ({∅} : V) = succ ∅ := by
+    unfold succ
+    rw [insert_def]
+    simp only [union_empty]
+  rw [h]
+  apply ω_succ_closed
+  exact empty_mem_ω
+
 end omega
 
 end local_attribute
