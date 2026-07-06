@@ -236,6 +236,18 @@ lemma power_singleton_empty : power ({∅} : V) = {∅, {∅}} := by
 
 end power
 
+section omega
+
+#check (ω : V)
+
+example : (∅ : V) ∈ (ω : V) := by exact empty_mem_ω
+
+example : ∀ x : V, (x ∈ (ω : V) → x ∪ {x} ∈ (ω : V)) := by
+  intro x hx
+  apply?
+
+end omega
+
 end local_attribute
 
 end external
