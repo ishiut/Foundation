@@ -267,6 +267,17 @@ section kpair
 example (x1 y1 x2 y2 : V) : x1 = x2 ∧ y1 =y2 ↔ ⟨x1, y1⟩ₖ =⟨x2, y2⟩ₖ := by
   exact Iff.symm kpair_iff
 
+example (x1 y1 z1 x2 y2 z2 : V) : x1 = x2 ∧ y1 = y2 ∧ z1 = z2 ↔
+    ⟨x1, y1, z1⟩ₖ =⟨x2, y2, z2⟩ₖ := by
+  constructor
+  case mp =>
+    intro h
+    rw [h.left, h.right.left, h.right.right]
+  case mpr =>
+    intro h
+    simp only [kpair_iff] at h
+    exact h
+
 end kpair
 
 end local_attribute
