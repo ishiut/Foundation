@@ -244,7 +244,12 @@ example : (∅ : V) ∈ (ω : V) := by exact empty_mem_ω
 
 example : ∀ x : V, (x ∈ (ω : V) → x ∪ {x} ∈ (ω : V)) := by
   intro x hx
-  apply?
+  have h_succ : x ∪ {x} = succ x := by
+    unfold succ
+    rw [insert_def]
+    rw [union_comm]
+  rw [h_succ]
+  exact ω_succ_closed hx
 
 end omega
 
