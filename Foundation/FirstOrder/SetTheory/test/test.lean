@@ -262,6 +262,13 @@ example : ({∅} : V) ∈ (ω : V) := by
 
 end omega
 
+section kpair
+
+example (x1 y1 x2 y2 : V) : x1 = x2 ∧ y1 =y2 ↔ ⟨x1, y1⟩ₖ =⟨x2, y2⟩ₖ := by
+  exact Iff.symm kpair_iff
+
+end kpair
+
 end local_attribute
 
 end external
