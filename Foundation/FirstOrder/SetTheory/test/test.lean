@@ -285,6 +285,43 @@ section separation
 #check separation_exists_eval
 #check (“x.&1 = x” : Semiformula ℒₛₑₜ V 1)
 
+variable (a : V)
+
+#check separation_exists_eval a (“x.&1 = x” : Semiformula ℒₛₑₜ V 1)
+
+example : ∃ x : V, (∅ ∉ x) ∧ ∀ y : V, y ∈ x → succ y ∈ x := by
+  obtain ⟨x, hx⟩ := separation_exists_eval (ω : V) (“x.&∅ ≠ x” : Semiformula ℒₛₑₜ V 1)
+  simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, LogicalConnective.HomClass.map_neg,
+    Semiformula.eval_operator_two, Semiterm.val_fvar, id_eq, Semiterm.val_bvar,
+    Matrix.cons_val_fin_one, Structure.Eq.eq, LogicalConnective.Prop.neg_eq] at hx
+  use x
+  constructor
+  case h.left =>
+    intro hx1
+    apply (hx ∅).mp at hx1
+    absurd hx1.right
+    rfl
+  case h.right =>
+    intro y hy
+    apply (hx y).mp at hy
+    obtain ⟨hy1, hy2⟩ := hy
+    have h1 : succ y ∈ (ω : V) := by
+      apply ω_succ_closed hy1
+    apply (hx (succ y)).mpr
+    constructor
+    case left => exact h1
+    case right =>
+      intro h2
+      have h3 : y ∈ (∅ : V) := by
+        rw [h2]
+        simp only [mem_succ_self]
+      absurd h3
+      apply not_mem_empty
+
+
+
+
+
 
 end separation
 
