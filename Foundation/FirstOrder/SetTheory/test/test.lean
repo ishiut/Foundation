@@ -280,6 +280,14 @@ example (x1 y1 z1 x2 y2 z2 : V) : x1 = x2 ∧ y1 = y2 ∧ z1 = z2 ↔
 
 end kpair
 
+section separation
+
+#check separation_exists_eval
+#check ()
+
+
+end separation
+
 end local_attribute
 
 end external
