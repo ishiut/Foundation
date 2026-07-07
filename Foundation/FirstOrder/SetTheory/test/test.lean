@@ -283,7 +283,7 @@ end kpair
 section separation
 
 #check separation_exists_eval
-#check ()
+#check (“x.&1 = x” : Semiformula ℒₛₑₜ V 1)
 
 
 end separation
