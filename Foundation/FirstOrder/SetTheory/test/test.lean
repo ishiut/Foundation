@@ -291,8 +291,7 @@ variable (a : V)
 #check separation_exists_eval a (“x.&1 = x” : Semiformula ℒₛₑₜ V 1)
 
 example : ∃ x : V, (∅ ∉ x) ∧ ∀ y : V, y ∈ x → succ y ∈ x := by
-  -- use {y ∈ ω ; y ≠ ∅}
-  use sep ω (fun y => y ≠ ∅) (by definability)
+  use {y ∈ ω ; y ≠ ∅}
   simp only [ne_eq, ne_empty_iff_isNonempty, mem_sep_iff, empty_mem_ω, true_and,
     not_isNonempty_iff_isEmpty, isEmpty_iff_eq_empty, and_imp]
   intro y hyω hy_nonempty
