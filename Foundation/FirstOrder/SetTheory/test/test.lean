@@ -308,6 +308,9 @@ def P := (fun (x : V) => x = ∅)
 #check P
 #check (ℒₛₑₜ-predicate P)
 #check (ℒₛₑₜ-predicate (fun (x : V) => x = ∅))
+#check fun (n : V) => {y ∈ ω ; y ≠ n}
+#check fun (n : V) => (sep ω (fun y => y ≠ n) (by definability))
+
 
 lemma neq_empty_definable: (ℒₛₑₜ-predicate (fun (x : V) => x ≠ ∅)) := by
   apply Language.Definable.imp
