@@ -369,6 +369,10 @@ example : IsTransitive ({∅} : V) := by
   rw [h]
   exact IsOrdinal.succ.toIsTransitive
 
+#check IsTransitive
+#check IsTransitive.succ
+#check IsOrdinal
+
 
 end ordinals
 
