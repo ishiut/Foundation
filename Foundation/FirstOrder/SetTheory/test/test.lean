@@ -3,6 +3,7 @@ import Foundation.FirstOrder.Basic.Semantics.Semantics
 import Foundation.FirstOrder.Basic.Syntax.Formula
 import Foundation.Vorspiel.ExistsUnique
 import Foundation.FirstOrder.SetTheory.Z
+import Foundation.FirstOrder.SetTheory.Ordinal
 
 namespace LO.FirstOrder.SetTheory
 namespace Semiformula
@@ -357,6 +358,20 @@ example : ∃ x : V, (∅ ∉ x) ∧ ∀ y : V, y ∈ x → succ y ∈ x := by
       exact absurd h1 not_mem_empty
 
 end separation
+
+section ordinals
+
+example : IsTransitive (∅ : V) := by exact IsTransitive.empty
+example : IsTransitive ({∅} : V) := by
+  have h : ({∅} : V) = succ ∅ := by
+    unfold succ
+    exact Eq.symm (insert_empty_eq ∅)
+  rw [h]
+  exact IsOrdinal.succ.toIsTransitive
+
+
+end ordinals
+
 
 end local_attribute
 
