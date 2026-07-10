@@ -373,6 +373,17 @@ example : IsTransitive ({∅} : V) := by
 #check IsTransitive.succ
 #check IsOrdinal
 
+variable (α : Ordinal V)
+#check α
+#check α.val
+
+noncomputable def zero : Ordinal V := ⟨∅, IsOrdinal.empty⟩
+#check zero
+#check zero.val
+
+example : zero.val = (∅ : V) := by
+  exact subset_empty_iff_eq_empty.mp fun z a ↦ a
+
 
 end ordinals
 
