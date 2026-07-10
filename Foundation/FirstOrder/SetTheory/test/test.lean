@@ -318,10 +318,43 @@ example : ∃ x : V, (∅ ∉ x) ∧ ∀ y : V, y ∈ x → succ y ∈ x := by
       absurd h3
       apply not_mem_empty
 
+def P := (fun (x : V) => x = ∅)
+#check P
+#check (ℒₛₑₜ-predicate P)
+#check (ℒₛₑₜ-predicate (fun (x : V) => x = ∅))
 
+lemma neq_empty_definable: (ℒₛₑₜ-predicate (fun (x : V) => x ≠ ∅)) := by
+  apply Language.Definable.imp
+  case hR =>
+    exact Language.DefinableFunction.const ∅
+  case hS =>
+    exact Language.Definable.const False
 
+#check separation_exists
 
-
+example : ∃ x : V, (∅ ∉ x) ∧ ∀ y : V, y ∈ x → succ y ∈ x := by
+  obtain ⟨x, hx⟩ := separation_exists (ω : V) (fun (x : V) => x ≠ ∅) neq_empty_definable
+  use x
+  constructor
+  case h.left =>
+    intro h
+    apply (hx ∅).mp at h
+    absurd h.right
+    rfl
+  case h.right =>
+    intro y hy
+    apply (hx (succ y)).mpr
+    constructor
+    case left =>
+      apply ω_succ_closed
+      apply (hx y).mp at hy
+      apply hy.left
+    case right =>
+      intro h
+      have h1 : y ∈ (∅ : V) := by
+        rw [← h]
+        simp only [mem_succ_self]
+      exact absurd h1 not_mem_empty
 
 end separation
 
