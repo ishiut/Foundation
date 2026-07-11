@@ -396,13 +396,27 @@ noncomputable def nat_ordinal : ℕ → Ordinal V
 
 #check nat_ordinal 0
 
-example : nat_ordinal 0 = (zero : Ordinal V) := by
+lemma nat_zero : nat_ordinal 0 = (zero : Ordinal V) := by
   exact Ordinal.ext rfl
 
-example : (nat_ordinal 1).val = ({∅} : V) := by
-  simp [nat_ordinal]
+lemma nat_one : (nat_ordinal 1).val = ({∅} : V) := by
+  simp only [nat_ordinal, Ordinal.succ_val]
   rw [zero_val]
-  apply?
+  unfold succ
+  exact insert_empty_eq ∅
+
+lemma nat_two : (nat_ordinal 2).val = ({∅, {∅}} : V) := by
+  unfold nat_ordinal
+  simp only [Ordinal.succ_val]
+  rw [nat_one]
+  unfold succ
+  ext x
+  simp only [mem_insert, mem_singleton_iff]
+  grind
+
+#check IsOrdinal.zero
+
+
 
 
 end ordinals
