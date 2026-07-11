@@ -374,9 +374,21 @@ noncomputable def zero : Ordinal V := ⟨∅, IsOrdinal.empty⟩
 #check zero
 #check zero.val
 
-example : zero.val = (∅ : V) := by
+lemma zero_val : zero.val = (∅ : V) := by
   exact subset_empty_iff_eq_empty.mp fun z a ↦ a
 
+example (α β : Ordinal V) (h : α.val =β.val) : α = β := by
+  exact Ordinal.ext h
+
+example (α β : Ordinal V) : α < β ∨ α = β ∨ β < α := by
+  exact lt_trichotomy α β
+
+example (α : Ordinal V) (hα : α ≠ zero) : zero < α := by
+  have h₁ : zero ≤ α := by
+    apply Ordinal.le_def.mpr
+    rw [zero_val]
+    apply empty_subset
+  exact Std.lt_of_le_of_ne h₁ (id (Ne.symm hα))
 
 end ordinals
 
