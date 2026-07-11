@@ -361,7 +361,10 @@ example : IsTransitive ({∅} : V) := by
 #check IsOrdinal
 
 example : IsOrdinal (ω : V) := by
-  apply?
+  exact IsOrdinal.ω
+
+example : IsOrdinal (succ (ω : V)) := by
+  exact IsOrdinal.succ
 
 variable (α : Ordinal V)
 #check α
