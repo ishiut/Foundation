@@ -415,6 +415,9 @@ lemma nat_two : (nat_ordinal 2).val = ({∅, {∅}} : V) := by
   grind
 
 #check IsOrdinal.zero
+#check (0 : V)
+#check (2 : V)
+
 
 
 
