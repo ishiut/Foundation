@@ -390,10 +390,19 @@ example (α : Ordinal V) (hα : α ≠ zero) : zero < α := by
     apply empty_subset
   exact Std.lt_of_le_of_ne h₁ (id (Ne.symm hα))
 
-def nat_ordinal : ℕ → Ordinal V
+noncomputable def nat_ordinal : ℕ → Ordinal V
   | 0 => zero
   | n + 1 => Ordinal.succ (nat_ordinal n)
 
+#check nat_ordinal 0
+
+example : nat_ordinal 0 = (zero : Ordinal V) := by
+  exact Ordinal.ext rfl
+
+example : (nat_ordinal 1).val = ({∅} : V) := by
+  simp [nat_ordinal]
+  rw [zero_val]
+  apply?
 
 
 end ordinals
