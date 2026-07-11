@@ -390,6 +390,10 @@ example (α : Ordinal V) (hα : α ≠ zero) : zero < α := by
     apply empty_subset
   exact Std.lt_of_le_of_ne h₁ (id (Ne.symm hα))
 
+def nat_ordinal : ℕ → Ordinal V
+  | 0 => zero
+  | n + 1 => Ordinal.succ (nat_ordinal n)
+
 
 
 end ordinals
