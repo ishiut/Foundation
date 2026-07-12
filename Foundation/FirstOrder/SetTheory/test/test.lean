@@ -348,18 +348,6 @@ end separation
 
 section ordinals
 
-example : IsTransitive (∅ : V) := by exact IsTransitive.empty
-example : IsTransitive ({∅} : V) := by
-  have h : ({∅} : V) = succ ∅ := by
-    unfold succ
-    exact Eq.symm (insert_empty_eq ∅)
-  rw [h]
-  exact IsOrdinal.succ.toIsTransitive
-
-#check IsTransitive
-#check IsTransitive.succ
-#check IsOrdinal
-
 example : IsOrdinal (ω : V) := by
   exact IsOrdinal.ω
 
