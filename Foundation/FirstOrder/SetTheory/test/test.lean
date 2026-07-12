@@ -321,7 +321,8 @@ lemma neq_empty_definable: (ℒₛₑₜ-predicate (fun (x : V) => x ≠ ∅)) :
 #check separation_exists
 
 example : ∃ x : V, (∅ ∉ x) ∧ ∀ y : V, y ∈ x → succ y ∈ x := by
-  obtain ⟨x, hx⟩ := separation_exists (ω : V) (fun (x : V) => x ≠ ∅) neq_empty_definable
+  -- obtain ⟨x, hx⟩ := separation_exists (ω : V) (fun (x : V) => x ≠ ∅) neq_empty_definable
+  obtain ⟨x, hx⟩ := separation_exists (ω : V) (fun (x : V) => x ≠ ∅) (by definability)
   use x
   constructor
   case h.left =>
@@ -354,9 +355,25 @@ example : IsOrdinal (ω : V) := by
 example : IsOrdinal (succ (ω : V)) := by
   exact IsOrdinal.succ
 
+#check (0 : V)
+#check (1 : V)
+
+example (α : V) (h₁ : IsOrdinal α) (h₂ : α ≠ (0 : V)) : 0 ∈ α := by
+  simp only [zero_def]
+  have h₃ : 0 ⊆ α := by
+    exact empty_subset α
+  apply IsOrdinal.subset_iff.mp at h₃
+  obtain h₃l | h₃r := h₃
+  case inl =>
+    rw [h₃l] at h₂
+    contradiction
+  case inr =>
+    exact h₃r
+
 variable (α : Ordinal V)
 #check α
 #check α.val
+#check (10000 : V)
 
 noncomputable def zero : Ordinal V := ⟨∅, IsOrdinal.empty⟩
 #check zero
@@ -407,9 +424,6 @@ lemma nat_two : (nat_ordinal 2).val = ({∅, {∅}} : V) := by
 instance : IsOrdinal (0 : V) := by
   exact IsOrdinal.zero
 
-#check ((0 : V) : Ordinal V)
-#check (2 : V)
-#check ((2 : V) : Ordinal V)
 
 
 
